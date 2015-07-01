@@ -317,3 +317,32 @@ class MongoQuery(object):
             if db :
                 self._dbconnection.end_request() 
 
+    def _retrieve_one_mongodb_record(self, dbName, dbCollName, recordJSON):
+         db = None
+         try:
+             dbName = str(dbName)
+             dbCollName = str(dbCollName)
+             criteria = dict(json.loads(recordJSON))
+             db = self._dbconnection['%s' % (dbName,)]
+             coll = db['%s' % (dbCollName)]
+             results = coll.find_one(criteria)
+             return results
+         finally :
+             if db :
+                 self._dbconnection.end_request()
+
+    def retrieve_one_mongodb_record(self, dbName, dbCollName):
+        """
+        Retrieve the first record from a given MongoDB database collection
+        based on the JSON entered.
+        Returned value must be single quoted for comparison, otherwise you will
+        get a TypeError error.
+
+        Usage is:
+        | ${result} | Retrieve One MongoDB Record | DBName | CollectionName | JSON |
+        | Log | ${result} |
+        | Should Contain X Times | ${result} | '${recordNo1}' | 1 |
+        """
+        print "| ${result} | Retrieve Some MongoDB Records | %s | %s | %s |" % (dbName,dbCollName,recordJSON)
+        return self._retrieve_one_mongodb_record(dbName, dbCollName, recordJSON)
+
